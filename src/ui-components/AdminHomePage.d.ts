@@ -1,0 +1,124 @@
+/***************************************************************************
+ * The contents of this file were generated with Amplify Studio.           *
+ * Please refrain from making any modifications to this file.              *
+ * Any changes to this file will be overwritten when running amplify pull. *
+ **************************************************************************/
+
+import * as React from "react";
+import { IconProps, TextProps, ViewProps } from "@aws-amplify/ui-react";
+export declare type EscapeHatchProps = {
+    [elementHierarchy: string]: Record<string, unknown>;
+} | null;
+export declare type VariantValues = {
+    [key: string]: string;
+};
+export declare type Variant = {
+    variantValues: VariantValues;
+    overrides: EscapeHatchProps;
+};
+export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
+export declare type AdminHomePageOverridesProps = {
+    AdminHomePage?: PrimitiveOverrideProps<ViewProps>;
+    "Dashboard Choices"?: PrimitiveOverrideProps<ViewProps>;
+    "Add/Remove"?: PrimitiveOverrideProps<TextProps>;
+    Audits?: PrimitiveOverrideProps<TextProps>;
+    "Sponsor Organizations"?: PrimitiveOverrideProps<TextProps>;
+    Permissions?: PrimitiveOverrideProps<TextProps>;
+    Security?: PrimitiveOverrideProps<TextProps>;
+    Boarders?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 2"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 4"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 5"?: PrimitiveOverrideProps<ViewProps>;
+    "Admin Page"?: PrimitiveOverrideProps<TextProps>;
+    "Rectangle 20"?: PrimitiveOverrideProps<ViewProps>;
+    "fa6-solid:gear"?: PrimitiveOverrideProps<ViewProps>;
+    Vector?: PrimitiveOverrideProps<IconProps>;
+    Dashboard?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 27"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 28"?: PrimitiveOverrideProps<ViewProps>;
+    "# of Drivers"?: PrimitiveOverrideProps<TextProps>;
+    "# of Accidents"?: PrimitiveOverrideProps<TextProps>;
+    "Avg Points"?: PrimitiveOverrideProps<TextProps>;
+    "# of Sponsors"?: PrimitiveOverrideProps<TextProps>;
+    Organizations?: PrimitiveOverrideProps<TextProps>;
+    "Rectangle 29"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 30"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 31"?: PrimitiveOverrideProps<ViewProps>;
+    "Org. Name23720"?: PrimitiveOverrideProps<TextProps>;
+    "Rectangle 32"?: PrimitiveOverrideProps<ViewProps>;
+    "Org. Name23722"?: PrimitiveOverrideProps<TextProps>;
+    "Rectangle 37"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 38"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 39"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 40"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 33"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 34"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 35"?: PrimitiveOverrideProps<ViewProps>;
+    "Rectangle 36"?: PrimitiveOverrideProps<ViewProps>;
+    "Org. Name23718"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name23724"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name23726"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name23728"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name23730"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name23732"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name23734"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name23717"?: PrimitiveOverrideProps<TextProps>;
+    "#24718"?: PrimitiveOverrideProps<ViewProps>;
+    "#24702"?: PrimitiveOverrideProps<TextProps>;
+    "#24703"?: PrimitiveOverrideProps<TextProps>;
+    "#24705"?: PrimitiveOverrideProps<TextProps>;
+    "#24706"?: PrimitiveOverrideProps<TextProps>;
+    "#24708"?: PrimitiveOverrideProps<TextProps>;
+    "#24709"?: PrimitiveOverrideProps<TextProps>;
+    "#24710"?: PrimitiveOverrideProps<TextProps>;
+    "#24711"?: PrimitiveOverrideProps<TextProps>;
+    "#24713"?: PrimitiveOverrideProps<TextProps>;
+    "#24714"?: PrimitiveOverrideProps<TextProps>;
+    "#24715"?: PrimitiveOverrideProps<TextProps>;
+    "#24716"?: PrimitiveOverrideProps<TextProps>;
+    "#24733"?: PrimitiveOverrideProps<ViewProps>;
+    "#24734"?: PrimitiveOverrideProps<TextProps>;
+    "#24735"?: PrimitiveOverrideProps<TextProps>;
+    "#24736"?: PrimitiveOverrideProps<TextProps>;
+    "#24737"?: PrimitiveOverrideProps<TextProps>;
+    "#24738"?: PrimitiveOverrideProps<TextProps>;
+    "#24739"?: PrimitiveOverrideProps<TextProps>;
+    "#24740"?: PrimitiveOverrideProps<TextProps>;
+    "#24741"?: PrimitiveOverrideProps<TextProps>;
+    "#24742"?: PrimitiveOverrideProps<TextProps>;
+    "#24743"?: PrimitiveOverrideProps<TextProps>;
+    "#24744"?: PrimitiveOverrideProps<TextProps>;
+    "#24745"?: PrimitiveOverrideProps<TextProps>;
+    "#24747"?: PrimitiveOverrideProps<ViewProps>;
+    "#24748"?: PrimitiveOverrideProps<TextProps>;
+    "#24749"?: PrimitiveOverrideProps<TextProps>;
+    "#24750"?: PrimitiveOverrideProps<TextProps>;
+    "#24751"?: PrimitiveOverrideProps<TextProps>;
+    "#24752"?: PrimitiveOverrideProps<TextProps>;
+    "#24753"?: PrimitiveOverrideProps<TextProps>;
+    "#24754"?: PrimitiveOverrideProps<TextProps>;
+    "#24755"?: PrimitiveOverrideProps<TextProps>;
+    "#24756"?: PrimitiveOverrideProps<TextProps>;
+    "#24757"?: PrimitiveOverrideProps<TextProps>;
+    "#24758"?: PrimitiveOverrideProps<TextProps>;
+    "#24759"?: PrimitiveOverrideProps<TextProps>;
+    "#24719"?: PrimitiveOverrideProps<ViewProps>;
+    "#24720"?: PrimitiveOverrideProps<TextProps>;
+    "#24721"?: PrimitiveOverrideProps<TextProps>;
+    "#24722"?: PrimitiveOverrideProps<TextProps>;
+    "#24723"?: PrimitiveOverrideProps<TextProps>;
+    "#24724"?: PrimitiveOverrideProps<TextProps>;
+    "#24725"?: PrimitiveOverrideProps<TextProps>;
+    "#24726"?: PrimitiveOverrideProps<TextProps>;
+    "#24727"?: PrimitiveOverrideProps<TextProps>;
+    "#24728"?: PrimitiveOverrideProps<TextProps>;
+    "#24729"?: PrimitiveOverrideProps<TextProps>;
+    "#24730"?: PrimitiveOverrideProps<TextProps>;
+    "#24731"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name24698"?: PrimitiveOverrideProps<TextProps>;
+    "Org. Name24700"?: PrimitiveOverrideProps<TextProps>;
+} & EscapeHatchProps;
+export declare type AdminHomePageProps = React.PropsWithChildren<Partial<ViewProps> & {
+    overrides?: AdminHomePageOverridesProps | undefined | null;
+}>;
+export default function AdminHomePage(props: AdminHomePageProps): React.ReactElement;

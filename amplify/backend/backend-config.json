@@ -1,0 +1,45 @@
+{
+  "auth": {
+    "team03rebuild": {
+      "customAuth": false,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito",
+      "serviceType": "imported"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_auth_team03rebuild_nativeClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "team03rebuild"
+        }
+      ]
+    },
+    "AMPLIFY_auth_team03rebuild_userPoolId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "team03rebuild"
+        }
+      ]
+    },
+    "AMPLIFY_auth_team03rebuild_userPoolName": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "team03rebuild"
+        }
+      ]
+    },
+    "AMPLIFY_auth_team03rebuild_webClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "team03rebuild"
+        }
+      ]
+    }
+  }
+}
