@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ApplicationPage: React.FC = () => {
+const DriverApplication: React.FC = () => {
   return (
     <div>
       <h1>Application Page</h1>
@@ -9,4 +9,4 @@ const ApplicationPage: React.FC = () => {
   );
 };
 
-export default ApplicationPage;
+export default DriverApplication;

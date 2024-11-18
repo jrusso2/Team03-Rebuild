@@ -1,35 +1,39 @@
 import { useEffect, useState } from "react";
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { fetchUserAttributes } from 'aws-amplify/auth';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import NavBar from "./ui/NavBar";
 import Profile from "./pages/Profile";
 import AboutPage from "./pages/AboutPage";
 import Catalog from "./pages/Catalog";
-import ApplicationPage from './pages/ApplicationPage'; 
-
+import DriverApplication from './pages/DriverApplication';
+import SponsorApplication from './pages/SponsorApplication';
+import AdminDashboard from './pages/AdminDashboard';
+import DriverDashboard from './pages/DriverDashboard';
+import SponsorDashboard from './pages/SponsorDashboard';
 
 type UserRole = "admin" | "driver" | "sponsor" | "guest";
 
 function App() {
   const { user } = useAuthenticator();
-  const [initialNavigationDone, setInitialNavigationDone] = useState(false);
+  const [initialNavigationDone] = useState(false);
   const [role, setRole] = useState<UserRole | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchUserRole() {
       try {
-        await getCurrentUser(); // Verify user is authenticated
-        const session = await fetchAuthSession();
-        
-        const groups = (session.tokens?.accessToken?.payload['cognito:groups'] as string[]) || [];
-        
-        if (groups.includes("Admin")) setRole("admin");
-        else if (groups.includes("Driver")) setRole("driver");
-        else if (groups.includes("Sponsor")) setRole("sponsor");
+        const attributes = await fetchUserAttributes();
+
+        console.log("User attributes:", attributes);
+
+        const userRole = attributes['custom:role'] || "guest";
+
+        if (userRole === "admin") setRole("admin");
+        else if (userRole === "driver") setRole("driver");
+        else if (userRole === "sponsor") setRole("sponsor");
         else setRole("guest");
-        
+
       } catch (error) {
         console.error('Error fetching user role:', error);
         setRole(null);
@@ -39,21 +43,21 @@ function App() {
     fetchUserRole();
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     if (initialNavigationDone || role === null) return;
 
-    if (role === "admin") {
-      navigate("/admin-dashboard");
-    } else if (role === "driver") {
-      navigate("/driver-dashboard");
-    } else if (role === "sponsor") {
-      navigate("/sponsor-dashboard");
-    } else {
-      navigate("/profile");
-      alert("Please update your profile information.");
+    if (location.pathname === "/") {
+      if (role === "admin") {
+        navigate("/admin-dashboard");
+      } else if (role === "driver") {
+        navigate("/driver-dashboard");
+      } else if (role === "sponsor") {
+        navigate("/sponsor-dashboard");
+      } else {
+        navigate("/profile");
+        alert("Please update your profile information.");
+      }
     }
-
-    setInitialNavigationDone(true);
   }, [role, navigate, initialNavigationDone]);
 
   return (
@@ -77,7 +81,12 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/catalog" element={<Catalog />} />
-          {role === "driver" && <Route path="/application" element={<ApplicationPage />} />}
+          <Route path="/DriverApplications" element={<DriverApplication />} />
+          <Route path="/SponsorApplications" element={<SponsorApplication />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/driver-dashboard" element={<DriverDashboard />} />
+          <Route path="/sponsor-dashboard" element={<SponsorDashboard />} />
+          <Route path="*" element={<h1>Page Not Found</h1>} />
         </Routes>
       </main>
     </>
