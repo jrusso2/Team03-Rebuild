@@ -29,7 +29,7 @@ const Checkout = () => {
             <li key={item.id}>
               <h3>{item.name}</h3>
               <p>{item.artist}</p>
-              <p>Price: ${item.price?.toFixed(2) ?? '0.00'}</p>
+              <p>Price: ${item.price?.toFixed(2) ?? '5.00'}</p>
               <img src={item.imageUrl ?? ''} alt={item.name} />
             </li>
           ))}
