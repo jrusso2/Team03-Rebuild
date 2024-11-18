@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { DataStore } from '@aws-amplify/datastore';
 import { CartItem } from '../models';
@@ -10,7 +9,7 @@ const Catalog = () => {
   const [mediaType, setMediaType] = useState('all');
   const [explicit, setExplicit] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const navigate = useNavigate();
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const loadCart = async () => {
@@ -69,15 +68,15 @@ const Catalog = () => {
     }
   };
 
-  const emptyCart = async () => {
-    const deletePromises = cart.map(item => DataStore.delete(item));
-    await Promise.all(deletePromises);
-    setCart([]);
+  const toggleCartPopup = () => {
+    setIsCartOpen(!isCartOpen);
   };
 
   const isInCart = (item: any) => cart.some(cartItem => cartItem.trackId === item.trackId);
 
-  const goToCheckout = () => navigate('/checkout');
+  const calculateSubtotal = () => {
+    return cart.reduce((total, item) => total + (item.price || 0), 0).toFixed(2);
+  };
 
   return (
     <div>
@@ -108,16 +107,67 @@ const Catalog = () => {
           </label>
           <button type="submit">Search</button>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <button onClick={goToCheckout} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            <FaShoppingCart size={24} />
-            <span>({cart.length})</span>
-          </button>
-          <button onClick={emptyCart} style={{ marginLeft: '10px', cursor: 'pointer' }}>
-            Empty Cart
-          </button>
-        </div>
+        <button onClick={toggleCartPopup} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+          <FaShoppingCart size={24} />
+          <span>({cart.length})</span>
+        </button>
       </form>
+
+      {/* Cart Popup Modal */}
+      {isCartOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            width: '300px',
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            padding: '16px',
+            position: 'relative'
+          }}>
+            <button onClick={toggleCartPopup} style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              border: 'none',
+              background: 'none',
+              fontSize: '18px',
+              cursor: 'pointer'
+            }}>X</button>
+            <h2>Cart</h2>
+            <ul style={{ listStyleType: 'none', padding: 0 }}>
+              {cart.map((item) => (
+                <li key={item.id} style={{ marginBottom: '8px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
+                  <img src={item.imageUrl} alt={item.name} style={{ width: '50px', height: '50px', marginRight: '8px' }} />
+                  <span>{item.name}</span>
+                  <span> - ${item.price?.toFixed(2) || 'N/A'}</span>
+                </li>
+              ))}
+            </ul>
+            <p>Subtotal: ${calculateSubtotal()}</p>
+            <button style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#007bff',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}>
+              Checkout
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -135,7 +185,7 @@ const Catalog = () => {
             <h3>{item.trackName || item.collectionName}</h3>
             <p>{item.artistName}</p>
             <img src={item.artworkUrl100} alt={item.trackName || item.collectionName} />
-            <p>{item.collectionPrice ? `Price: $${item.collectionPrice} | Points: ${Math.round(item.collectionPrice)}` : 'Price not available'}</p>
+            <p>{item.collectionPrice ? `Price: $${item.collectionPrice.toFixed(2)}` : 'Price not available'}</p>
             <button onClick={() => toggleCartItem(item)}>
               {isInCart(item) ? 'Remove from Cart' : 'Add to Cart'}
             </button>
