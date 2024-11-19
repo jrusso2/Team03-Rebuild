@@ -1,4 +1,3 @@
-// aws-exports.d.ts
 
 declare const awsmobile: {
     aws_project_region: string;
