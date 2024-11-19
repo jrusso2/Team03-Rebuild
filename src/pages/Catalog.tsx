@@ -11,6 +11,8 @@ const Catalog = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const POINTS_PER_DOLLAR = 10; // Change this value as needed, will change to database call *fingers crossed*
+
   useEffect(() => {
     const loadCart = async () => {
       const cartItems = await DataStore.query(CartItem);
@@ -48,7 +50,7 @@ const Catalog = () => {
 
   const toggleCartItem = async (item: any) => {
     const isItemInCart = cart.some((cartItem) => cartItem.trackId === item.trackId);
-  
+
     if (isItemInCart) {
       const itemToDelete = cart.find((cartItem) => cartItem.trackId === item.trackId);
       if (itemToDelete) {
@@ -72,10 +74,19 @@ const Catalog = () => {
     setIsCartOpen(!isCartOpen);
   };
 
+  const emptyCart = async () => {
+    const itemsToDelete = await DataStore.query(CartItem);
+    for (const item of itemsToDelete) {
+      await DataStore.delete(item);
+    }
+    setCart([]); // Clear the cart state
+  };
+
   const isInCart = (item: any) => cart.some(cartItem => cartItem.trackId === item.trackId);
 
-  const calculateSubtotal = () => {
-    return cart.reduce((total, item) => total + (item.price || 0), 0).toFixed(2);
+  const calculateTotalPoints = () => {
+    const totalPoints = cart.reduce((total, item) => total + ((item.price || 0) * POINTS_PER_DOLLAR), 0);
+    return Math.round(totalPoints);
   };
 
   return (
@@ -107,10 +118,26 @@ const Catalog = () => {
           </label>
           <button type="submit">Search</button>
         </div>
-        <button onClick={toggleCartPopup} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-          <FaShoppingCart size={24} />
-          <span>({cart.length})</span>
-        </button>
+        <div>
+          <button onClick={toggleCartPopup} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            <FaShoppingCart size={24} />
+            <span>({cart.length})</span>
+          </button>
+          <button
+            onClick={emptyCart}
+            style={{
+              marginLeft: '8px',
+              backgroundColor: 'red',
+              color: 'white',
+              border: 'none',
+              padding: '6px 12px',
+              cursor: 'pointer',
+              borderRadius: '4px',
+            }}
+          >
+            Empty Cart
+          </button>
+        </div>
       </form>
 
       {/* Cart Popup Modal */}
@@ -146,13 +173,13 @@ const Catalog = () => {
             <ul style={{ listStyleType: 'none', padding: 0 }}>
               {cart.map((item) => (
                 <li key={item.id} style={{ marginBottom: '8px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
-                  <img src={item.imageUrl} alt={item.name} style={{ width: '50px', height: '50px', marginRight: '8px' }} />
+                  <img src={item.imageUrl || undefined} alt={item.name} style={{ width: '50px', height: '50px', marginRight: '8px' }} />
                   <span>{item.name}</span>
-                  <span> - ${item.price?.toFixed(2) || 'N/A'}</span>
+                  <span> - {Math.round((item.price || 0) * POINTS_PER_DOLLAR)} Points</span>
                 </li>
               ))}
             </ul>
-            <p>Subtotal: ${calculateSubtotal()}</p>
+            <p>Total Points: {calculateTotalPoints()}</p>
             <button style={{
               width: '100%',
               padding: '10px',
@@ -185,7 +212,7 @@ const Catalog = () => {
             <h3>{item.trackName || item.collectionName}</h3>
             <p>{item.artistName}</p>
             <img src={item.artworkUrl100} alt={item.trackName || item.collectionName} />
-            <p>{item.collectionPrice ? `Price: $${item.collectionPrice.toFixed(2)}` : 'Price not available'}</p>
+            <p>{item.collectionPrice ? `${Math.round(item.collectionPrice * POINTS_PER_DOLLAR)} Points` : 'Points not available'}</p>
             <button onClick={() => toggleCartItem(item)}>
               {isInCart(item) ? 'Remove from Cart' : 'Add to Cart'}
             </button>
