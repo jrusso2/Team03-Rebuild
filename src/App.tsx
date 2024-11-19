@@ -11,6 +11,7 @@ import SponsorApplication from './pages/SponsorApplication';
 import AdminDashboard from './pages/AdminDashboard';
 import DriverDashboard from './pages/DriverDashboard';
 import SponsorDashboard from './pages/SponsorDashboard';
+import Checkout from './pages/Checkout';
 
 type UserRole = "admin" | "driver" | "sponsor" | "guest";
 
@@ -96,6 +97,7 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/driver-dashboard" element={<DriverDashboard />} />
           <Route path="/sponsor-dashboard" element={<SponsorDashboard />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="*" element={<h1>Page Not Found</h1>} />
         </Routes>
       </main>

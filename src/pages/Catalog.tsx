@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FaShoppingCart } from 'react-icons/fa';
 import { DataStore } from '@aws-amplify/datastore';
 import { CartItem } from '../models';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,7 +12,8 @@ const Catalog = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const POINTS_PER_DOLLAR = 10; // Change this value as needed, will change to database call *fingers crossed*
+  const navigate = useNavigate(); // Initialize useNavigate
+  const POINTS_PER_DOLLAR = 10; // Change this value as needed
 
   useEffect(() => {
     const loadCart = async () => {
@@ -180,15 +182,17 @@ const Catalog = () => {
               ))}
             </ul>
             <p>Total Points: {calculateTotalPoints()}</p>
-            <button style={{
-              width: '100%',
-              padding: '10px',
-              backgroundColor: '#007bff',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+            <button 
+              onClick={() => navigate('/checkout')} 
+              style={{
+                width: '100%',
+                padding: '10px',
+                backgroundColor: '#007bff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}>
               Checkout
             </button>
           </div>
