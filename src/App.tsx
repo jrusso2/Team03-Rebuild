@@ -27,21 +27,32 @@ function App() {
 
         console.log("User attributes:", attributes);
 
-        const userRole = attributes['custom:role'] || "guest";
+        const userRole = attributes['custom:role'];
 
-        if (userRole === "admin") setRole("admin");
-        else if (userRole === "driver") setRole("driver");
-        else if (userRole === "sponsor") setRole("sponsor");
-        else setRole("guest");
-
+        if (!userRole) {
+          // Navigate to profile if custom:role is missing
+          setRole("guest");
+          navigate("/profile");
+          alert("Please update your profile information.");
+        } else if (userRole === "admin") {
+          setRole("admin");
+        } else if (userRole === "driver") {
+          setRole("driver");
+        } else if (userRole === "sponsor") {
+          setRole("sponsor");
+        } else {
+          setRole("guest");
+        }
       } catch (error) {
         console.error('Error fetching user role:', error);
-        setRole(null);
+        setRole("guest");
+        navigate("/profile");
+        alert("Error fetching user information. Please update your profile.");
       }
     }
 
     fetchUserRole();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (initialNavigationDone || role === null) return;
@@ -55,7 +66,6 @@ function App() {
         navigate("/sponsor-dashboard");
       } else {
         navigate("/profile");
-        alert("Please update your profile information.");
       }
     }
   }, [role, navigate, initialNavigationDone]);

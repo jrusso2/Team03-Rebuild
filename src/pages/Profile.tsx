@@ -57,27 +57,33 @@ const Profile = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // Update user attributes
+            const attributesToUpdate: Record<string, string> = {
+                email: formData.email,
+                'custom:role': formData.role,
+            };
+    
+            console.log("Attempting to update attributes directly:", attributesToUpdate);
+    
+            // Attempt to set the role directly
             await updateUserAttributes({
-                userAttributes: {
-                    email: formData.email,
-                    'custom:role': formData.role,
-                },
+                userAttributes: attributesToUpdate,
             });
+    
             setMessage('Profile updated successfully.');
-            
-            window.location.reload();
-
             setUserInfo((prev) => ({
                 ...prev,
                 email: formData.email,
                 role: formData.role,
             }));
+    
+            console.log("Attributes updated successfully.");
         } catch (error) {
             console.error("Error updating user attributes:", error);
             setMessage('Failed to update profile. Please try again.');
         }
     };
+    
+    
 
     return (
         <div>
