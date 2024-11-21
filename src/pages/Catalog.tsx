@@ -2,18 +2,44 @@ import React, { useEffect, useState } from 'react';
 import { FaShoppingCart } from 'react-icons/fa';
 import { DataStore } from '@aws-amplify/datastore';
 import { CartItem } from '../models';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
-const Catalog = () => {
+interface User {
+  signInDetails?: {
+    loginId?: string;
+  };
+}
+
+const Catalog = ({ user }: { user: User }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [mediaType, setMediaType] = useState('all');
   const [explicit, setExplicit] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [sponsors, setSponsors] = useState<any[]>([]);
 
-  const navigate = useNavigate(); // Initialize useNavigate
-  const POINTS_PER_DOLLAR = 10; // Change this value as needed
+  const navigate = useNavigate();
+  const POINTS_PER_DOLLAR = 10; // Points conversion rate
+
+  useEffect(() => {
+    const fetchSponsors = async () => {
+      try {
+        const response = await fetch(
+          `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getSponsorsForDriver?driverEmail=${user?.signInDetails?.loginId}`
+        );
+        const data = await response.json();
+        console.log(data.body)
+        setSponsors(JSON.parse(data.body));
+      } catch (error) {
+        console.error('Error fetching sponsors:', error);
+      }
+    };
+
+    if (user?.signInDetails?.loginId) {
+      fetchSponsors();
+    }
+  }, [user]);
 
   useEffect(() => {
     const loadCart = async () => {
@@ -94,6 +120,26 @@ const Catalog = () => {
   return (
     <div>
       <h1>Catalog Page</h1>
+
+      {/* Display sponsors */}
+      <div>
+        <h2>Your Sponsors</h2>
+        {sponsors.length === 0 ? (
+          <p>No sponsors available.</p>
+        ) : (
+          <ul>
+            {sponsors.map((sponsor) => (
+              <li key={sponsor.id}>
+                <p>
+                  <strong>{sponsor.fname} {sponsor.lname}</strong> - Balance: {sponsor.balance} Points
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Search Form */}
       <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <input
@@ -199,6 +245,7 @@ const Catalog = () => {
         </div>
       )}
 
+      {/* Search Results */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -212,17 +259,27 @@ const Catalog = () => {
             textAlign: 'center',
             borderRadius: '8px',
             backgroundColor: '#f9f9f9'
-          }}>
-            <h3>{item.trackName || item.collectionName}</h3>
-            <p>{item.artistName}</p>
-            <img src={item.artworkUrl100} alt={item.trackName || item.collectionName} />
-            <p>{item.collectionPrice ? `${Math.round(item.collectionPrice * POINTS_PER_DOLLAR)} Points` : 'Points not available'}</p>
-            <button onClick={() => toggleCartItem(item)}>
-              {isInCart(item) ? 'Remove from Cart' : 'Add to Cart'}
-            </button>
-          </div>
+        }}>
+          <h3>{item.trackName || item.collectionName}</h3>
+          <p>{item.artistName}</p>
+          <p style={{ fontWeight: 'bold', margin: '8px 0' }}>
+              Price: {item.collectionPrice ? `${Math.round(item.collectionPrice * POINTS_PER_DOLLAR)} Points` : 'Not Available'}
+          </p>
+        <img src={item.artworkUrl100 || undefined} alt={item.trackName || item.collectionName} style={{ width: '100px', height: '100px', marginBottom: '8px' }} />
+        <button onClick={() => toggleCartItem(item)} style={{
+         backgroundColor: isInCart(item) ? 'red' : 'green',
+          color: 'white',
+          border: 'none',
+          padding: '8px 16px',
+          borderRadius: '4px',
+          cursor: 'pointer'
+         }}>
+            {isInCart(item) ? 'Remove from Cart' : 'Add to Cart'}
+          </button>
+        </div>
         ))}
       </div>
+
     </div>
   );
 };
