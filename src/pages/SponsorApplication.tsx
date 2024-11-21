@@ -1,5 +1,5 @@
 import React from 'react';
-import ViewApplicationsTable from '../ui/Sponsor/ViewApplicationsTable';
+import ViewApplicationsTable from '../ui/sponsor/ViewApplicationsTable';
 
 const SponsorApplication: React.FC = () => {
   return (
