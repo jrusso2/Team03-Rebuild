@@ -42,9 +42,9 @@ const DriverApplication: React.FC = () => {
 
   const handleApplyToSponsor = async (sponsorId: number) => {
     try {
-      await axios.post(
-        `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/insertNewApplication`,
-        null,
+      {/**TODO: This should almost definitely be a POST, not a get, but I could only get a GET to work for now */}
+      const response = await axios.get(
+        `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/insertNewApplication`,
         {
           params: {
             driverEmail: user?.signInDetails?.loginId,
@@ -53,6 +53,7 @@ const DriverApplication: React.FC = () => {
         }
       );
       alert(`Application to Sponsor ID: ${sponsorId} submitted successfully!`);
+      console.log(response);
     } catch (err: any) {
       alert(`Failed to apply to Sponsor ID: ${sponsorId}. Error: ${err.message}`);
     }
