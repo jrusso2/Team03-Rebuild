@@ -1,5 +1,5 @@
 import React from 'react';
-import ViewDriversTable from '../ui/Sponsor/ViewDriversTable';
+import ViewDriversTable from '../ui/sponsor/ViewDriversTable';
 const SponsorDashboard: React.FC = () => {
   return (
     <div>
