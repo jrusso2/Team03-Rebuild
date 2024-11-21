@@ -16,9 +16,6 @@
     "Requires Symbols"
   ],
   "mfaConfiguration": "OPTIONAL",
-  "autoVerifiedAttributes": [
-    "email"
-  ],
   "mfaTypes": [
     "SMS Text Message"
   ]

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { useEffect, useState } from 'react';
-import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { fetchUserAttributes } from 'aws-amplify/auth';
 
 type UserRole = "admin" | "driver" | "sponsor" | "guest";
 
@@ -13,20 +13,18 @@ function NavBar() {
   useEffect(() => {
     async function fetchUserRole() {
       try {
-        await getCurrentUser(); // Verify user is authenticated
-        const session = await fetchAuthSession();
+        // Fetch the role attribute using `fetchUserAttributes`
+        const attributes = await fetchUserAttributes();
+        const userRole = attributes['custom:role'] || "guest";
         
-        // Type assertion to ensure groups is treated as string array
-        const groups = (session.tokens?.accessToken?.payload['cognito:groups'] as string[]) || [];
-        
-        // Check group membership and set role accordingly
-        if (groups.includes("Admin")) setRole("admin");
-        else if (groups.includes("Driver")) setRole("driver");
-        else if (groups.includes("Sponsor")) setRole("sponsor");
-        else setRole("guest");
-
+        // Validate role and set it
+        if (userRole === "admin" || userRole === "driver" || userRole === "sponsor") {
+          setRole(userRole as UserRole);
+        } else {
+          setRole("guest");
+        }
       } catch (error) {
-        console.error('Error fetching user role:', error);
+        console.error("Error fetching user attributes:", error);
         setRole("guest");
       }
     }
@@ -46,14 +44,14 @@ function NavBar() {
     cursor: 'pointer',
     fontSize: '1rem',
     textDecoration: 'none',
-    height: '2.5rem', // Ensure consistent height
+    height: '2.5rem',
     marginRight: '1rem'
   };
 
   const signOutButtonStyle = {
     ...buttonStyle,
     backgroundColor: '#ff0000',
-    marginRight: 0 // Remove margin for the last button
+    marginRight: 0
   };
 
   const handleDashboardClick = () => {
@@ -68,6 +66,14 @@ function NavBar() {
     }
   };
 
+  const handleApplicationClick = () => {
+    if (role === "driver") {
+      navigate("/DriverApplications");
+    } else if (role === "sponsor") {
+      navigate("/SponsorApplications");
+    }
+  };
+
   return (
     <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#f8f9fa' }}>
       <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 0 }}>
@@ -77,9 +83,14 @@ function NavBar() {
         <li style={{ marginRight: '1rem' }}>
           <Link to="/profile" style={buttonStyle}>Profile</Link>
         </li>
-        {role === "driver" && (
+        {role && (role === "driver" || role === "sponsor") && (
           <li style={{ marginRight: '1rem' }}>
-            <Link to="/application" style={buttonStyle}>Application</Link>
+            <button 
+              onClick={handleApplicationClick} 
+              style={buttonStyle}
+            >
+              Application
+            </button>
           </li>
         )}
         <li style={{ marginRight: '1rem' }}>

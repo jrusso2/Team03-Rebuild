@@ -1,126 +1,106 @@
 import React, { useEffect, useState } from 'react';
-import { withAuthenticator } from '@aws-amplify/ui-react';
-import { Amplify } from 'aws-amplify';
-import { getCurrentUser, updateUserAttribute } from 'aws-amplify/auth';
-import awsExports from '../aws-exports';
-import { type UpdateUserAttributeOutput } from 'aws-amplify/auth';
-
-Amplify.configure(awsExports);
+import { fetchUserAttributes, fetchAuthSession, updateUserAttributes } from 'aws-amplify/auth';
 
 const Profile = () => {
     const [userInfo, setUserInfo] = useState({
         username: '',
         userId: '',
-        signInDetails: {},
-        role: 'sponsor',
+        email: '',
+        role: '',
     });
-    const [attributes, setAttributes] = useState({ username: '', email: '', custom: { role: 'sponsor' } });
+
+    const [formData, setFormData] = useState({
+        email: '',
+        role: '',
+    });
+
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        const fetchUser = async () => {
+        const fetchUserData = async () => {
             try {
-                const currentUser = await getCurrentUser() as any;
-                const { username, signInDetails } = currentUser;
-                const userId = currentUser.sub;
-                const attributes = currentUser.attributes || {};
+                // Fetch the username from session
+                const session = await fetchAuthSession();
+                const username = typeof session.tokens?.accessToken?.payload['username'] === 'string'
+                    ? session.tokens.accessToken.payload['username']
+                    : 'Unknown Username';
 
-                setUserInfo({ username, userId, signInDetails, role: attributes['custom:role'] || 'sponsor' });
-                setAttributes({
-                    username: username || '',
-                    email: attributes.email || '',
-                    custom: { role: attributes['custom:role'] || 'sponsor' }
+                // Fetch other attributes using fetchUserAttributes
+                const attributes = await fetchUserAttributes();
+                console.log("User attributes:", attributes);
+
+                setUserInfo({
+                    username,
+                    userId: attributes['sub'] || 'Unknown User ID',
+                    email: attributes['email'] || '',
+                    role: attributes['custom:role'] || '',
+                });
+
+                // Prepopulate form data
+                setFormData({
+                    email: attributes['email'] || '',
+                    role: attributes['custom:role'] || '',
                 });
             } catch (error) {
-                console.error("Error fetching user:", error);
+                console.error("Error fetching user data:", error);
             }
-        };   
-        fetchUser();
+        };
+
+        fetchUserData();
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        if (name.startsWith('custom:')) {
-            setAttributes((prev) => ({
-                ...prev,
-                custom: { ...prev.custom, [name]: value }
-            }));
-        } else {
-            setAttributes((prev) => ({ ...prev, [name]: value }));
-        }
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    async function handleUpdateUserAttribute(attributeKey: string, value: string) {
-        try {
-            console.log(`Attempting to update attribute: ${attributeKey} with value: ${value}`);
-            
-            const output = await updateUserAttribute({
-                userAttribute: {
-                    attributeKey,
-                    value,
-                },
-            });
-            handleUpdateUserAttributeNextSteps(output);
-        }catch (error: any) {
-            // Log the full error response for debugging purposes
-            console.error(`Error updating attribute: ${attributeKey}`, error.response || error);
-            setMessage(`Failed to update ${attributeKey}. Please check permissions or formatting.`);
-        }
-    }
-    
-
-    function handleUpdateUserAttributeNextSteps(output: UpdateUserAttributeOutput) {
-        const { nextStep } = output;
-
-        switch (nextStep.updateAttributeStep) {
-            case 'CONFIRM_ATTRIBUTE_WITH_CODE':
-                const codeDeliveryDetails = nextStep.codeDeliveryDetails;
-                console.log(
-                    `Confirmation code was sent to ${codeDeliveryDetails?.deliveryMedium}.`
-                );
-                break;
-            case 'DONE':
-                console.log(`Attribute was successfully updated.`);
-                break;
-        }
-    }
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // handleUpdateUserAttribute('username', attributes.username);
-        handleUpdateUserAttribute('email', attributes.email);
-        handleUpdateUserAttribute('custom:role', attributes.custom.role);
-        
+        try {
+            const attributesToUpdate: Record<string, string> = {
+                email: formData.email,
+                'custom:role': formData.role,
+            };
+    
+            console.log("Attempting to update attributes directly:", attributesToUpdate);
+    
+            // Attempt to set the role directly
+            await updateUserAttributes({
+                userAttributes: attributesToUpdate,
+            });
+    
+            setMessage('Profile updated successfully.');
+            setUserInfo((prev) => ({
+                ...prev,
+                email: formData.email,
+                role: formData.role,
+            }));
+    
+            console.log("Attributes updated successfully.");
+        } catch (error) {
+            console.error("Error updating user attributes:", error);
+            setMessage('Failed to update profile. Please try again.');
+        }
     };
+    
+    
 
     return (
         <div>
             <h1>User Profile</h1>
             <p>Username: {userInfo.username}</p>
-            <p>User ID: {userInfo.userId}</p>
-            <p>Sign-In Details: {JSON.stringify(userInfo.signInDetails)}</p>
+            <p>Email: {userInfo.email}</p>
             <p>Role: {userInfo.role}</p>
             <hr />
 
-            <h2>Update Profile Information</h2>
+            <h2>Update Profile</h2>
             <form onSubmit={handleSubmit}>
-                <label>
-                    Username:
-                    <input
-                        type="text"
-                        name="username"
-                        value={attributes.username || userInfo.username}
-                        onChange={handleChange}
-                        required
-                    />
-                </label>
-                <br />
                 <label>
                     Email:
                     <input
                         type="email"
                         name="email"
-                        value={attributes.email}
+                        value={formData.email}
                         onChange={handleChange}
                         required
                     />
@@ -129,13 +109,14 @@ const Profile = () => {
                 <label>
                     Role:
                     <select
-                        name="custom:role"
-                        value={attributes.custom.role}
+                        name="role"
+                        value={formData.role}
                         onChange={handleChange}
                         required
                     >
                         <option value="driver">Driver</option>
                         <option value="sponsor">Sponsor</option>
+                        <option value="admin">Admin</option>
                     </select>
                 </label>
                 <br />
@@ -147,4 +128,4 @@ const Profile = () => {
     );
 };
 
-export default withAuthenticator(Profile);
+export default Profile;
