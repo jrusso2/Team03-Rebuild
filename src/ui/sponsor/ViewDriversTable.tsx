@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 
 export type Driver = {
@@ -14,7 +14,7 @@ export default function ViewDriversTable()
     const { user } = useAuthenticator();
     const [drivers, setDrivers] = useState<Driver[] | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+    const [error, _setError] = useState<any>(null);
     
 
     useEffect(() => {
