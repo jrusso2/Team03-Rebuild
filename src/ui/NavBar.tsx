@@ -18,7 +18,7 @@ function NavBar() {
         const userRole = attributes['custom:role'] || "guest";
         
         // Validate role and set it
-        if (userRole === "admin" || userRole === "driver" || userRole === "sponsor") {
+        if (["admin", "driver", "sponsor"].includes(userRole)) {
           setRole(userRole as UserRole);
         } else {
           setRole("guest");
@@ -99,6 +99,11 @@ function NavBar() {
         <li style={{ marginRight: '1rem' }}>
           <Link to="/catalog" style={buttonStyle}>Catalog</Link>
         </li>
+        {role === "admin" && (
+          <li style={{ marginRight: '1rem' }}>
+            <Link to="/user-management" style={buttonStyle}>User Management</Link>
+          </li>
+        )}
       </ul>
       <button 
         onClick={signOut}
