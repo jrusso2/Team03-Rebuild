@@ -9,7 +9,7 @@ const AboutPage: React.FC = () => {
     const fetchData = async () => {
       try {
         console.log('Fetching data from API...'); // Log to check if fetch is happening
-        const response = await fetch('https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/main/users');
+        const response = await fetch('https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/users');
         
         // Check if response is okay
         if (!response.ok) {
