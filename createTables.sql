@@ -35,16 +35,14 @@ CREATE TABLE INVOICE (
     FOREIGN KEY (sponsor_id) REFERENCES SPONSOR(sponsor_id),
     FOREIGN KEY (driver_id) REFERENCES DRIVER(driver_id)
 );
-
-
 CREATE TABLE POINT_HISTORY (
+    pointHist_id INT AUTO_INCREMENT PRIMARY KEY,  
     driver_id INT NOT NULL,
     sponsor_id INT NOT NULL,
     addOrSub CHAR(3) NOT NULL,
     amount INT NOT NULL,
     reason VARCHAR(255),
-    time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Changed from TIME to 
-    PRIMARY KEY (driver_id, sponsor_id),  -- Composite primary key 
+    time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
     FOREIGN KEY (driver_id) REFERENCES DRIVER(driver_id),
     FOREIGN KEY (sponsor_id) REFERENCES SPONSOR(sponsor_id)
 );
