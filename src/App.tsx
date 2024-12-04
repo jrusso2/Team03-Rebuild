@@ -94,7 +94,7 @@ function App() {
         <Routes>
           <Route path="/profile" element={<Profile />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/catalog" element={<Catalog />} />
+          <Route path="/catalog" element={<Catalog user={user}/>} />
           <Route path="/DriverApplications" element={<DriverApplication />} />
           <Route path="/SponsorApplications" element={<SponsorApplication />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
