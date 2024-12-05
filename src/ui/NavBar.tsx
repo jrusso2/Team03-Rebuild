@@ -99,6 +99,9 @@ function NavBar() {
         <li style={{ marginRight: '1rem' }}>
           <Link to="/catalog" style={buttonStyle}>Catalog</Link>
         </li>
+        <li style={{ marginRight: '1rem' }}>
+          <Link to="/faq" style={buttonStyle}>FAQ</Link>
+        </li>
         {role === "admin" && (
           <li style={{ marginRight: '1rem' }}>
             <Link to="/user-management" style={buttonStyle}>User Management</Link>

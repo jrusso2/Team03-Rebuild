@@ -15,6 +15,7 @@ import Checkout from './pages/Checkout';
 import UserManagement from './pages/UserManagement';
 import ManageUser from './pages/ManageUser';
 import CreateUser from './pages/CreateUser';
+import FAQpage from './pages/FAQpage';
 
 type UserRole = "admin" | "driver" | "sponsor" | "guest";
 
@@ -104,6 +105,7 @@ function App() {
           <Route path="/user-management" element={<UserManagement />} />
           <Route path="/manage-user/:id" element={<ManageUser />} />
           <Route path="/create-user" element={<CreateUser />} />
+          <Route path="/faq" element={<FAQpage />} />
           <Route path="*" element={<h1>Page Not Found</h1>} />
         </Routes>
       </main>
