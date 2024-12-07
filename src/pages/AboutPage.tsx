@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import '../app.css';
 
 const AboutPage: React.FC = () => {
-  const [data, setData] = useState<string | null>(null); // data can be a string or null
+  //const [data, setData] = useState<string | null>(null); // data can be a string or null
   const [error, setError] = useState<string | null>(null); // error can be a string or null
   const [loading, setLoading] = useState(true); // To track loading state
   const [userCount, setUserCount] = useState<number | null>(null); // For user count
