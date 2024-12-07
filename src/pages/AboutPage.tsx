@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import '../app.css';
+import '../App.css';
 
 const AboutPage: React.FC = () => {
   //const [data, setData] = useState<string | null>(null); // data can be a string or null
