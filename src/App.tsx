@@ -101,7 +101,7 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/driver-dashboard" element={<DriverDashboard />} />
           <Route path="/sponsor-dashboard" element={<SponsorDashboard />} />
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout" element={<Checkout driverID={""} sponsorID={""} />} />
           <Route path="/user-management" element={<UserManagement />} />
           <Route path="/manage-user/:id" element={<ManageUser />} />
           <Route path="/create-user" element={<CreateUser />} />
