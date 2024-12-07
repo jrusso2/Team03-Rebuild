@@ -84,10 +84,10 @@ CREATE TABLE SPONSOR_DRIVER (
     FOREIGN KEY (sponsor_id) REFERENCES SPONSOR(sponsor_id) ON DELETE CASCADE,
     FOREIGN KEY (driver_id) REFERENCES DRIVER(driver_id) ON DELETE CASCADE
 );
+USE team03;
+-- delete driver without taking them out of the user table.
+ALTER TABLE DRIVER
+DROP FOREIGN KEY fk_driver_user_id;
 
-UPDATE SPONSOR_DRIVER 
-    SET sponsor_driver_point_balance = sponsor_driver_point_balance + 50
-    WHERE sponsor_id = 1 AND driver_id = 4
-
-INSERT INTO POINT_HISTORY (driver_id, sponsor_id, addOrSub, amount, reason)
-VALUES (4, 1, 'add', 50, 'completed a successful delivery');
+ALTER TABLE DRIVER
+ADD CONSTRAINT fk_driver_user_id FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE SET NULL;
