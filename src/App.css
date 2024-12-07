@@ -40,3 +40,12 @@
 .read-the-docs {
   color: #888;
 }
+
+.bold-paragraph {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+p {
+  font-size: 1.5rem;
+}
