@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUserAttributes, fetchAuthSession, updateUserAttributes } from 'aws-amplify/auth';
+import { fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth';
 
 const Profile = () => {
     const [userInfo, setUserInfo] = useState({
@@ -7,11 +7,14 @@ const Profile = () => {
         userId: '',
         email: '',
         role: '',
+        firstName: '',
+        lastName: '',
     });
 
     const [formData, setFormData] = useState({
         email: '',
-        role: '',
+        firstName: '',
+        lastName: '',
     });
 
     const [message, setMessage] = useState('');
@@ -21,35 +24,75 @@ const Profile = () => {
             try {
                 // Fetch the username from session
                 const session = await fetchAuthSession();
-                const username = typeof session.tokens?.accessToken?.payload['username'] === 'string'
-                    ? session.tokens.accessToken.payload['username']
-                    : 'Unknown Username';
+                const username =
+                    typeof session.tokens?.accessToken?.payload['username'] === 'string'
+                        ? session.tokens.accessToken.payload['username']
+                        : 'Unknown Username';
 
                 // Fetch other attributes using fetchUserAttributes
                 const attributes = await fetchUserAttributes();
-                console.log("User attributes:", attributes);
+                console.log('User attributes:', attributes);
 
+                // Fetch the user ID from the API using email
+                const userIdResponse = await fetch(
+                    `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/main/getUserIdWithEmail?email=${encodeURIComponent(
+                        attributes['email'] || ''
+                    )}`
+                );
+
+                if (!userIdResponse.ok) {
+                    throw new Error('Failed to fetch user ID');
+                }
+
+                const userIdData = await userIdResponse.json();
+                console.log('UserID:', userIdData);
+
+                // Parse the response correctly if the body is a string
+                const parsedUserIdData = JSON.parse(userIdData.body); // Parse the body if it's a JSON string
+                const userId = parsedUserIdData[0]?.id || 'Unknown User ID';
+                console.log('Parsed user id', userId); // Access the first element's id
+
+                // Fetch the full user details (first name, last name, etc.) using the user ID
+                const userResponse = await fetch(
+                    `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/main/getUser?id=${userId}`
+                );
+
+                if (!userResponse.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+
+                const userData = await userResponse.json();
+                console.log("User Data: ", userData);
+
+                // Parse the body if needed
+                const parsedUserData = JSON.parse(userData.body); // Parse the user data body if it's a JSON string
+                const user = parsedUserData[0] || {}; // Access the first element's data
+
+                // Set user info state with the correct values
                 setUserInfo({
-                    username,
-                    userId: attributes['sub'] || 'Unknown User ID',
-                    email: attributes['email'] || '',
-                    role: attributes['custom:role'] || '',
+                    username: username, // Add username
+                    userId: userId,     // Add userId
+                    firstName: user?.firstName || 'N/A',
+                    lastName: user?.lastName || 'N/A',
+                    email: user?.email || 'N/A',
+                    role: user?.user_type || 'Unknown Role',
                 });
 
                 // Prepopulate form data
                 setFormData({
-                    email: attributes['email'] || '',
-                    role: attributes['custom:role'] || '',
+                    email: user?.email || '',
+                    firstName: user?.firstName || '',
+                    lastName: user?.lastName || '',
                 });
             } catch (error) {
-                console.error("Error fetching user data:", error);
+                console.error('Error fetching user data:', error);
             }
         };
 
         fetchUserData();
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
@@ -57,39 +100,53 @@ const Profile = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const attributesToUpdate: Record<string, string> = {
-                email: formData.email,
-                'custom:role': formData.role,
-            };
-    
-            console.log("Attempting to update attributes directly:", attributesToUpdate);
-    
-            // Attempt to set the role directly
-            await updateUserAttributes({
-                userAttributes: attributesToUpdate,
-            });
-    
-            setMessage('Profile updated successfully.');
-            setUserInfo((prev) => ({
-                ...prev,
-                email: formData.email,
-                role: formData.role,
-            }));
-    
-            console.log("Attributes updated successfully.");
+            // Build the query string for the API call
+            const queryString = new URLSearchParams({
+                id: userInfo.userId,
+                firstName: formData.firstName || '',
+                lastName: formData.lastName || '',
+                email: formData.email || '',
+            }).toString();
+
+            const response = await fetch(
+                `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/main/updateUser?${queryString}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('API Response:', result);
+                setMessage('Profile updated successfully.');
+                setUserInfo((prev) => ({
+                    ...prev,
+                    email: formData.email,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                }));
+            } else {
+                const error = await response.json();
+                console.error('Error response:', error);
+                setMessage('Failed to update profile. Please try again.');
+            }
         } catch (error) {
-            console.error("Error updating user attributes:", error);
+            console.error('Error updating user attributes:', error);
             setMessage('Failed to update profile. Please try again.');
         }
     };
-    
-    
 
     return (
         <div>
             <h1>User Profile</h1>
+            <p>User ID: {userInfo.userId}</p>
             <p>Username: {userInfo.username}</p>
             <p>Email: {userInfo.email}</p>
+            <p>First Name: {userInfo.firstName || '(Not Set)'}</p>
+            <p>Last Name: {userInfo.lastName || '(Not Set)'}</p>
             <p>Role: {userInfo.role}</p>
             <hr />
 
@@ -107,17 +164,27 @@ const Profile = () => {
                 </label>
                 <br />
                 <label>
-                    Role:
-                    <select
-                        name="role"
-                        value={formData.role}
+                    First Name:
+                    <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
                         onChange={handleChange}
+                        placeholder="Enter your first name"
                         required
-                    >
-                        <option value="driver">Driver</option>
-                        <option value="sponsor">Sponsor</option>
-                        <option value="admin">Admin</option>
-                    </select>
+                    />
+                </label>
+                <br />
+                <label>
+                    Last Name:
+                    <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        placeholder="Enter your last name"
+                        required
+                    />
                 </label>
                 <br />
                 <button type="submit">Update Profile</button>
