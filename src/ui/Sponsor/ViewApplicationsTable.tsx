@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import axios from 'axios';
-
+import { fetchUserAttributes } from 'aws-amplify/auth';
 
 export type Application = {
     driver_id: number;
@@ -16,30 +16,43 @@ export default function ViewDriversTable()
     const [drivers, setDrivers] = useState<Application[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, _setError] = useState<any>(null);
-    
+    let email:string;
+    //const [email, setEmail] = useState<string | null>("");
 
     useEffect(() => {
-
-        
+    const fetchEmail = async () =>{
+        const attributes = await fetchUserAttributes();
+        let user_email;
+        user_email = await attributes['email'];
+        if(!user_email) return "";
+        return user_email as string;
+    };
+    
 
     // fetching Drivers from db
-    const fetchData = async () => {
-
+    const fetchData = async (email:string) => {
+        //await fetchEmail();
+        console.log(email);
         //now, to fetch the drivers that belong to the sponsor
         try {
-            const response = await fetch('https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getOpenApplicationsForSponsor?sponsorEmail=' + user?.signInDetails?.loginId);
+            const response = await fetch('https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getOpenApplicationsForSponsor?sponsorEmail=' + email);
             const data = await response.json();
-            console.log(data.body);
+            //console.log(data.body);
             setDrivers(JSON.parse(data.body) as Application[]);
         } catch (error) {
             console.log(error);
         } finally {
             setLoading(false);
         }
-
+        
     };
 
-    fetchData();
+    const doTasks = async () => {
+        email = await fetchEmail();
+        
+        await fetchData(email as string);
+    }
+    doTasks();
     }, []); // Empty dependency array means this effect runs once on mount
 
     if (loading) {
@@ -55,7 +68,7 @@ export default function ViewDriversTable()
     }
     else
     {
-        //return <div>{user?.signInDetails?.loginId}</div>
+       //return <div>{email}</div>
     }
 
     //const drivers:Application[] = [{driver_fname: 'Michael', id: 1, driver_lname:'Schwab',balance:5},{driver_fname: 'Michael', id: 1, driver_lname:'Schwab',balance:5},{driver_fname: 'Michael', id: 1, driver_lname:'Schwab',balance:5}];
@@ -83,11 +96,10 @@ export default function ViewDriversTable()
         try {
           {/**TODO: This should almost definitely be a POST, not a get, but I could only get a GET to work for now */}
           const response = await axios.get(
-            `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/insertNewApplication`,
+            `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/Applications/rejectApplication`,
             {
               params: {
-                driverEmail: user?.signInDetails?.loginId,
-                sponsorID: sponsorId,
+                applicationID: sponsorId
               },
             }
           );
@@ -127,7 +139,7 @@ export default function ViewDriversTable()
             </thead>
             <tbody>
                 {drivers.map( (app) => (
-                    <tr key={app.driver_id} className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'>
+                    <tr key={app.app_id} className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'>
                         <td className='px-6 py-4'>{app.driver_fname + ' ' + app.driver_lname}</td>
                         <td className='px-6 py-4'>{}</td>
                         <td className='px-6 py-4'></td>
