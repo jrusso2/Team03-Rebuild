@@ -10,12 +10,13 @@ type Sponsor = {
 };
 
 const DriverApplication: React.FC = () => {
+
   const { user } = useAuthenticator();
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [user_email, setEmail] = useState<string | null>("");
-
+ 
   useEffect(() => {
     const fetchEmail = async () =>{
       const attributes = await fetchUserAttributes();
@@ -71,6 +72,10 @@ const DriverApplication: React.FC = () => {
       );
       alert(`Application to Sponsor ID: ${sponsorId} submitted successfully!`);
       console.log(response);
+
+      //TODO: something more elegant to get clear something from list
+      window.location.reload();
+     
     } catch (err: any) {
       alert(`Failed to apply to Sponsor ID: ${sponsorId}. Error: ${err.message}`);
     }
