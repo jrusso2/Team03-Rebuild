@@ -2,25 +2,74 @@ import { useEffect, useState } from 'react';
 import { DataStore } from '@aws-amplify/datastore';
 import { CartItem } from '../models';
 
+import { fetchUserAttributes } from 'aws-amplify/auth';
 const POINTS_PER_DOLLAR = 10; // Points conversion rate
+
+export type Sponsor = {
+  sponsor_id: number;
+  fname: string;
+  lname: string;
+  balance: string;
+};
+
+
 
 const Checkout = ({ driverID, sponsorID }: { driverID: string; sponsorID: string }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [purchaseComplete, setPurchaseComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [user_email, setEmail] = useState<string>("");
+  const [sponsors, setSponsors] = useState<Sponsor[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  loading;
+  sponsorID;
   useEffect(() => {
+    //fetching the email of the user who is logged in
+    const fetchEmail = async () =>{
+      const attributes = await fetchUserAttributes();
+      let email;
+      email = await attributes['email'];
+      if(!email) return "";
+      setEmail(email);
+      return email as string;
+    };
+
+  
+  const fetchSponsors = async (email:string) => {
+    //now, to fetch the sponsors that belong to the driver
+    try {
+        const response = await fetch('https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getSponsorsForDriver?driverEmail=' + email);
+        const data = await response.json(); 
+        const parsed = JSON.parse(data.body) as Sponsor[];
+        //console.log()
+        setSponsors(parsed);
+    } catch (error) {
+        console.log(error);
+    } finally {
+        setLoading(false);
+    }
+
+   };
+
+   const doTasks = async () => {
+    let email = await fetchEmail();
+    
+    await fetchSponsors(email as string);
+   };
+
     const fetchCartItems = async () => {
       const items = await DataStore.query(CartItem);
       setCart(items);
     };
 
     fetchCartItems();
-
+    doTasks();
     const subscription = DataStore.observe(CartItem).subscribe(() => fetchCartItems());
 
+    
     return () => subscription.unsubscribe();
   }, []);
+
 
   const calculateTotalPoints = () => {
     return cart.reduce((total, item) => total + Math.round((item.price || 0) * POINTS_PER_DOLLAR), 0);
@@ -28,37 +77,76 @@ const Checkout = ({ driverID, sponsorID }: { driverID: string; sponsorID: string
 
   const handleCheckout = async () => {
     const totalPoints = calculateTotalPoints();
+    console.log("DRIVER ID: " + driverID);
 
-    try {
-      // Call API to update sponsor-driver point balance
-      const response = await fetch('/updateSponsorDriverPointBalance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          addOrSub: 'subtract', // Indicating deduction of points
-          amount: totalPoints,
-          driverID,
-          reason: 'Purchase',
-          sponsorID,
-        }),
-      });
+    try
+    {
+    //grabbing the driver's ID
+    let driver_id:number;
+    const response = await fetch('https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getUserIdWithEmail?email=' + user_email);
+    const data = await response.json(); 
+    const parsed = JSON.parse(data.body);
+    console.log(parsed);
+    if(false )
+    {
+      alert("Something went wrong. (User not found).");
+      return;
+    }
+    driver_id = parsed[0].id;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to process checkout');
+    //console.log("Sponsor i");
+    
+    if(!sponsors || !selectedSponsor)
+    {
+      alert("Please choose a sponsor.");
+      return;
+    }
+    if(totalPoints > parseInt(sponsors[selectedSponsor].balance,10))
+    {
+        alert("You don't have enough points with this sponsor to buy these items. \n\n(Your points with this sponsor: " + sponsors[selectedSponsor].balance + ". Price of cart: "+ totalPoints + ")");
+        return;
+    }
+    //Sponsor's id was selected by user previously
+    let sponsor_id = sponsors[selectedSponsor].sponsor_id;
+
+    console.log("driver: " + driver_id + "sponsor: " + sponsor_id);
+
+      try {
+        // Call API to update sponsor-driver point balance
+        //TODO: make this a post
+        const response = await fetch('https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/updateSponsorDriverPointBalance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            addOrSub: 'sub', // Indicating deduction of points
+            amount: totalPoints,
+            driverId: driver_id,
+            reason: 'Purchase',
+            sponsorId: sponsor_id,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to process checkout');
+        }
+        console.log(response);
+        // Clear cart items from DataStore on successful API call
+        const itemsToDelete = await DataStore.query(CartItem);
+        for (const item of itemsToDelete) {
+          await DataStore.delete(item);
+        }
+
+        // Update state to show purchase completion message
+        setCart([]);
+        setPurchaseComplete(true);
+        setError(null); // Clear any previous errors
+      } catch (err: any) {
+        console.error('Error during checkout:', err);
+        setError(err.message || 'An unexpected error occurred during checkout.');
       }
-
-      // Clear cart items from DataStore on successful API call
-      const itemsToDelete = await DataStore.query(CartItem);
-      for (const item of itemsToDelete) {
-        await DataStore.delete(item);
-      }
-
-      // Update state to show purchase completion message
-      setCart([]);
-      setPurchaseComplete(true);
-      setError(null); // Clear any previous errors
-    } catch (err: any) {
+    } catch(err: any)
+    {
       console.error('Error during checkout:', err);
       setError(err.message || 'An unexpected error occurred during checkout.');
     }
@@ -70,6 +158,13 @@ const Checkout = ({ driverID, sponsorID }: { driverID: string; sponsorID: string
       await DataStore.delete(itemToRemove);
       setCart(cart.filter((item) => item.id !== itemId));
     }
+  };
+  const [selectedSponsor, setSelectedSponsor] = useState<number | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const index = parseInt(e.target.value, 10);
+    setSelectedSponsor(index);
+    console.log("Selected Index:", index);
   };
 
   return (
@@ -90,6 +185,15 @@ const Checkout = ({ driverID, sponsorID }: { driverID: string; sponsorID: string
         <p style={{ textAlign: 'center', fontSize: '18px', color: '#555' }}>Your cart is empty.</p>
       ) : (
         <div>
+          {(!sponsors ? "You don't have any sponsors" : 
+          <select value={selectedSponsor ?? ""} onChange={handleChange}>
+            <option value="" disabled>-- Select a Sponsor--</option>
+            {sponsors.map((sponsor, index) => (
+              <option key={index} value={index}>
+                {sponsor.fname + " " + sponsor.lname + ": " + sponsor.balance + " points."}
+              </option>
+            ))}
+          </select>)}
           <ul style={{ listStyleType: 'none', padding: 0 }}>
             {cart.map((item) => (
               <li
