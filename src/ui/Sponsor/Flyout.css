@@ -1,0 +1,34 @@
+.menu
+{
+    width:100%;
+    height:100%;
+    background-color: grey;
+    position:fixed;
+    top:0px;
+    left:0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.menu button
+{
+    width: 10%; 
+}
+
+#amount_input
+{
+    text-align: center;
+}
+
+#reason_input
+{
+    width: 20%;
+    height:5%
+}
+.nothing
+{
+    display:none;   
+}
