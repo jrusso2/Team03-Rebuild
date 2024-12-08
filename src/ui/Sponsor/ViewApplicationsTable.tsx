@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import axios from 'axios';
 import { fetchUserAttributes } from 'aws-amplify/auth';
 
@@ -12,7 +11,7 @@ export type Application = {
 
 export default function ViewDriversTable()
 {
-    const { user } = useAuthenticator();
+    
     const [drivers, setDrivers] = useState<Application[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, _setError] = useState<any>(null);
