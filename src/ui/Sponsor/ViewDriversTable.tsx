@@ -31,6 +31,8 @@ export default function ViewDriversTable()
         return email as string;
     };
     const fetchData = async (email:string) => {
+        //TODO: if query returns empty, don't print null to page
+        
         //now, to fetch the drivers that belong to the sponsor
         try {
             const response = await fetch('https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getDriversForSponsor?sponsorEmail=' + email);
@@ -87,6 +89,9 @@ export default function ViewDriversTable()
           );
           alert(`Removed driver with id=${driverId}`);
           console.log(response);
+
+          //TODO: something more elegant to get clear something from list
+          window.location.reload();
         } catch (err: any) {
           alert(`Failed to remove driver. Error: ${err.message}`);
         }

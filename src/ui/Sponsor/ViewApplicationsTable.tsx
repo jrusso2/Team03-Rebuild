@@ -28,7 +28,7 @@ export default function ViewDriversTable()
     };
     
 
-    // fetching Drivers from db
+    // fetching Drivers from db 
     const fetchData = async (email:string) => {
         //await fetchEmail();
         console.log(email);
@@ -86,6 +86,8 @@ export default function ViewDriversTable()
           );
           alert(`Application to Sponsor ID: ${sponsorId} submitted successfully!`);
           console.log(response);
+          //TODO: something more elegant to get clear something from list
+          window.location.reload();
         } catch (err: any) {
           alert(`Failed to apply to Sponsor ID: ${sponsorId}. Error: ${err.message}`);
         }
@@ -104,6 +106,8 @@ export default function ViewDriversTable()
           );
           alert(`Application to Sponsor ID: ${sponsorId} submitted successfully!`);
           console.log(response);
+          //TODO: something more elegant to get clear something from list
+          window.location.reload();
         } catch (err: any) {
           alert(`Failed to apply to Sponsor ID: ${sponsorId}. Error: ${err.message}`);
         }
