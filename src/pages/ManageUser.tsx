@@ -12,7 +12,7 @@ type User = {
 };
 
 type Sponsor = {
-  id: number;
+  id: number | undefined;
   fname: string;
   lname: string;
   email: string;
@@ -33,16 +33,17 @@ const ManageUser: React.FC = () => {
     lastName: '',
     user_type: ''
   });
+  const [allSponsors, setAllSponsors] = useState<Sponsor[]>([]);
+  const [selectedSponsor, setSelectedSponsor] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getUser`,
-          { params: { id: id } }
+          'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getUser',
+          { params: { id } }
         );
-
         const userData = JSON.parse(response.data.body)[0];
         setUserData(userData);
       } catch (err: any) {
@@ -52,30 +53,70 @@ const ManageUser: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchUser();
   }, [id, user]);
 
+  const loadSponsors = async (driverEmail: string) => {
+    try {
+      const response = await axios.get(
+        'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getSponsorsForDriver',
+        { params: { driverEmail: driverEmail } }
+      );
+      let sponsorsData = JSON.parse(response.data.body);
+      console.log(sponsorsData);
+  
+      // Normalize the sponsor data just like in fetchAllSponsors
+      sponsorsData = sponsorsData.map((sponsor: any) => ({
+        ...sponsor,
+        fname: sponsor.fname || sponsor.firstName || '',
+        lname: sponsor.lname || sponsor.lastName || '',
+      }));
+  
+      setSponsors(sponsorsData);
+    } catch (err: any) {
+      console.error("API Error:", err);
+    }
+  };
+  
+
   useEffect(() => {
-    const fetchSponsors = async () => {
-      if (userData?.user_type === 'driver') {
-        try {
-          const response = await axios.get(
-            `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getSponsorsForDriver`,
-            { params: { driverEmail: userData.email } }
+    if (userData?.user_type === 'driver') {
+      loadSponsors(userData.email);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    const fetchAllSponsors = async () => {
+      try {
+        const response = await axios.get(
+          'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/sponsors'
+        );
+        let sponsorsData = JSON.parse(response.data.body);
+
+        if (Array.isArray(sponsorsData)) {
+          // Normalize sponsor data to have fname/lname
+          sponsorsData = sponsorsData.map((sponsor: any) => ({
+            ...sponsor,
+            fname: sponsor.fname || sponsor.firstName || '',
+            lname: sponsor.lname || sponsor.lastName || '',
+          }));
+
+          const validSponsors = sponsorsData.filter(
+            (sponsor: Sponsor) => sponsor.fname && sponsor.lname
           );
-          const sponsorsData = JSON.parse(response.data.body);
-          setSponsors(sponsorsData);
-        } catch (err: any) {
-          console.error("API Error:", err);
+          setAllSponsors(validSponsors);
+        } else {
+          console.error("Expected an array but got:", sponsorsData);
+          setAllSponsors([]);
         }
+      } catch (err: any) {
+        console.error("API Error:", err);
+        setAllSponsors([]);
       }
     };
 
-    if (userData) {
-      fetchSponsors();
-    }
-  }, [userData]);
+    fetchAllSponsors();
+  }, []);
 
   const handleEditClick = () => {
     setEditForm({
@@ -89,7 +130,7 @@ const ManageUser: React.FC = () => {
   const handleUpdateUser = async () => {
     try {
       const updates: any = { type: 'updateUser', id: userData?.id };
-      
+
       if (editForm.firstName !== userData?.firstName) {
         updates.firstName = editForm.firstName;
       }
@@ -104,12 +145,10 @@ const ManageUser: React.FC = () => {
         'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/updateUser',
         updates,
         {
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         }
       );
-      
+
       if (response.status === 200) {
         setUserData({ ...userData!, ...editForm });
         setIsEditing(false);
@@ -119,6 +158,38 @@ const ManageUser: React.FC = () => {
       alert('Failed to update user: ' + (err.response?.data?.message || err.message));
     }
   };
+
+  const handleLinkSponsor = async () => {
+    if (selectedSponsor && userData) {
+      try {
+        // Include 'type': 'addSponsorDriverRelation' just like you did in the Lambda test
+        const response = await axios.post(
+          'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/addSponsorDriverRelation',
+          { 
+            type: 'addSponsorDriverRelation',
+            driver_id: userData.id, 
+            sponsor_id: selectedSponsor 
+          },
+          {
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+  
+        if (response.status === 200) {
+          alert('Sponsor linked successfully!');
+          // If you want to skip reloading the sponsors to avoid the empty array issue, 
+          // just comment out or remove the following lines:
+          // if (userData.user_type === 'driver') {
+          //   await loadSponsors(userData.email);
+          // }
+        }
+      } catch (err: any) {
+        console.error("Linking Error:", err);
+        alert('Failed to link sponsor: ' + (err.response?.data?.message || err.message));
+      }
+    }
+  };
+  
 
   if (loading) return <div>Loading user details...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -160,24 +231,25 @@ const ManageUser: React.FC = () => {
             </div>
           </div>
 
-          <div className="border-b pb-4">
-            {userData.user_type === 'driver' && (
-              <div className="mt-6">
-                <h2 className="text-xl font-semibold mb-4">Affiliated Sponsors</h2>
-                {sponsors.length > 0 ? (
-                  <div className="space-y-2">
-                    {sponsors.map((sponsor) => (
-                      <div key={sponsor.id} className="p-3 bg-gray-50 rounded">
+          {userData.user_type === 'driver' && (
+            <div className="border-b pb-4 mt-6">
+              <h2 className="text-xl font-semibold mb-4">Affiliated Sponsors</h2>
+              {sponsors.length > 0 ? (
+                <div className="space-y-2">
+                  {sponsors.map((sponsor, index) => {
+                    const sponsorKey = sponsor.id ?? `aff-sponsor-fallback-${index}`;
+                    return (
+                      <div key={sponsorKey} className="p-3 bg-gray-50 rounded">
                         <span className="font-bold">{sponsor.fname} {sponsor.lname}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500">No sponsors affiliated with this driver.</p>
-                )}
-              </div>
-            )}
-          </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-gray-500">No sponsors affiliated with this driver.</p>
+              )}
+            </div>
+          )}
 
           <div className="flex space-x-4">
             <button
@@ -196,6 +268,40 @@ const ManageUser: React.FC = () => {
               Delete User
             </button>
           </div>
+
+          {userData.user_type === 'driver' && (
+            <div>
+              <label className="block text-gray-700 mb-2">Link Sponsor</label>
+              <select
+                value={selectedSponsor !== null ? selectedSponsor.toString() : ''}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  setSelectedSponsor(isNaN(val) ? null : val);
+                }}
+                className="w-full p-2 border rounded"
+              >
+                <option value="" disabled>Select a sponsor</option>
+                {allSponsors.map((sponsor, index) => {
+                  const sponsorKey = sponsor.id ?? `all-sponsor-fallback-${index}`;
+                  const optionValue = sponsor.id !== undefined
+                    ? sponsor.id.toString()
+                    : index.toString();
+
+                  return (
+                    <option key={sponsorKey} value={optionValue}>
+                      {sponsor.fname} {sponsor.lname}
+                    </option>
+                  );
+                })}
+              </select>
+              <button
+                onClick={handleLinkSponsor}
+                className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Link Sponsor
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -203,7 +309,6 @@ const ManageUser: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4">Edit User</h2>
-            
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-700 mb-2">First Name</label>
