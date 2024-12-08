@@ -194,7 +194,7 @@ const Profile = () => {
                 </label>
                 <br />
                 <label>
-                    Last Name:
+                    Phone Number:
                     <input
                         type="text"
                         name="phoneNumber"
