@@ -19,6 +19,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               return (
                 <>
                   <Authenticator.SignUp.FormFields />
+                  <input name="email" placeholder="Email" />
+                  <input name="custom:first_name" placeholder="First Name" />
+                  <input name="custom:last_name" placeholder="Last Name" />
+                  <input name="custom:role" placeholder="Role" />
                 </>
               );
             },
