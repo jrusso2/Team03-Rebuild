@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuthenticator } from '@aws-amplify/ui-react';
+import { fetchUserAttributes } from 'aws-amplify/auth';
 
 type Sponsor = {
   id: number;
@@ -13,14 +14,25 @@ const DriverApplication: React.FC = () => {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>("");
 
   useEffect(() => {
+    const fetchEmail = async () =>{
+      const attributes = await fetchUserAttributes();
+      const user_email = attributes['email'];
+      if(user_email)
+      {
+        setEmail(user_email);
+      }
+      console.log("***********user email!!" + user_email);
+      
+    }
     const fetchSponsors = async () => {
       try {
         setLoading(true);
         const response = await axios.get(
           `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getSponsorsNotConnectedToDriver`,
-          { params: { driverEmail: user?.signInDetails?.loginId } }
+          { params: { driverEmail: email } }
         );
 
         // Parse the body if it's a JSON string
@@ -36,23 +48,24 @@ const DriverApplication: React.FC = () => {
         setLoading(false);
       }
     };
-
+    fetchEmail();
     fetchSponsors();
   }, [user]);
 
   const handleApplyToSponsor = async (sponsorId: number) => {
     try {
-      await axios.post(
-        `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/insertNewApplication`,
-        null,
+      {/**TODO: This should almost definitely be a POST, not a get, but I could only get a GET to work for now */}
+      const response = await axios.get(
+        `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/insertNewApplication`,
         {
           params: {
-            driverEmail: user?.signInDetails?.loginId,
+            driverEmail: email,
             sponsorID: sponsorId,
           },
         }
       );
       alert(`Application to Sponsor ID: ${sponsorId} submitted successfully!`);
+      console.log(response);
     } catch (err: any) {
       alert(`Failed to apply to Sponsor ID: ${sponsorId}. Error: ${err.message}`);
     }
