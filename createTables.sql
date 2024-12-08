@@ -91,3 +91,6 @@ DROP FOREIGN KEY fk_driver_user_id;
 
 ALTER TABLE DRIVER
 ADD CONSTRAINT fk_driver_user_id FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE SET NULL;
+
+ALTER TABLE User ADD phoneNumber VARCHAR(10);
+

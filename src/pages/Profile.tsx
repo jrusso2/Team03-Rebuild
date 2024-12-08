@@ -9,12 +9,14 @@ const Profile = () => {
         role: '',
         firstName: '',
         lastName: '',
+        phoneNumber:'',
     });
 
     const [formData, setFormData] = useState({
         email: '',
         firstName: '',
         lastName: '',
+        phoneNumber:'',
     });
 
     const [message, setMessage] = useState('');
@@ -74,6 +76,7 @@ const Profile = () => {
                     userId: userId,     // Add userId
                     firstName: user?.firstName || 'N/A',
                     lastName: user?.lastName || 'N/A',
+                    phoneNumber: user?.phoneNumber || 'N/A',
                     email: user?.email || 'N/A',
                     role: user?.user_type || 'Unknown Role',
                 });
@@ -83,6 +86,7 @@ const Profile = () => {
                     email: user?.email || '',
                     firstName: user?.firstName || '',
                     lastName: user?.lastName || '',
+                    phoneNumber: user?.phoneNumber || '',
                 });
             } catch (error) {
                 console.error('Error fetching user data:', error);
@@ -106,6 +110,7 @@ const Profile = () => {
                 firstName: formData.firstName || '',
                 lastName: formData.lastName || '',
                 email: formData.email || '',
+                phoneNumber: formData.phoneNumber 
             }).toString();
 
             const response = await fetch(
@@ -145,6 +150,7 @@ const Profile = () => {
             <p>User ID: {userInfo.userId}</p>
             <p>Username: {userInfo.username}</p>
             <p>Email: {userInfo.email}</p>
+            <p>Phone Number: {userInfo.phoneNumber}</p>
             <p>First Name: {userInfo.firstName || '(Not Set)'}</p>
             <p>Last Name: {userInfo.lastName || '(Not Set)'}</p>
             <p>Role: {userInfo.role}</p>
@@ -183,6 +189,18 @@ const Profile = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         placeholder="Enter your last name"
+                        required
+                    />
+                </label>
+                <br />
+                <label>
+                    Phone Number:
+                    <input
+                        type="text"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        placeholder="Enter your phone number"
                         required
                     />
                 </label>
