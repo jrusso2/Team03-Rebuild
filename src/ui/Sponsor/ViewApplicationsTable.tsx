@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { fetchUserAttributes } from 'aws-amplify/auth';
 
+
 export type Application = {
     driver_id: number;
     driver_fname: string;
@@ -9,12 +10,15 @@ export type Application = {
     app_id:number;
 };
 
+
+
 export default function ViewDriversTable()
 {
     
     const [drivers, setDrivers] = useState<Application[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, _setError] = useState<any>(null);
+   
     let email:string;
     //const [email, setEmail] = useState<string | null>("");
 
@@ -59,11 +63,11 @@ export default function ViewDriversTable()
     }
 
     if (error) {
-    return <div>Error loading drivers: {error.message}</div>;
+    return <div>Error loading applications: {error.message}</div>;
     }
 
     if (!drivers) {
-        return <div>No drivers available</div>;
+        return <div>No applications available</div>;
     }
     else
     {
@@ -84,12 +88,12 @@ export default function ViewDriversTable()
               },
             }
           );
-          alert(`Application to Sponsor ID: ${sponsorId} submitted successfully!`);
+          alert(`Application accepted successfully!`);
           console.log(response);
           //TODO: something more elegant to get clear something from list
           window.location.reload();
         } catch (err: any) {
-          alert(`Failed to apply to Sponsor ID: ${sponsorId}. Error: ${err.message}`);
+          alert(`Failed to apply to accept application... Error: ${err.message}`);
         }
       };
 
@@ -118,25 +122,20 @@ export default function ViewDriversTable()
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-                Your Drivers
-                <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">View your drivers</p>
+                Your Applications
+                <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">View pending applications</p>
             </caption>
             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
                     <th scope="col" className="px-6 py-3">
                         Driver Name
                     </th>
+                    
                     <th scope="col" className="px-6 py-3">
-                        Point Balance
+                        Accept
                     </th>
                     <th scope="col" className="px-6 py-3">
-                        ...
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                        Remove?
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                        <span className="sr-only">...</span>
+                        Reject
                     </th>
                 </tr>
             </thead>
@@ -144,8 +143,6 @@ export default function ViewDriversTable()
                 {drivers.map( (app) => (
                     <tr key={app.app_id} className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'>
                         <td className='px-6 py-4'>{app.driver_fname + ' ' + app.driver_lname}</td>
-                        <td className='px-6 py-4'>{}</td>
-                        <td className='px-6 py-4'></td>
                         <td className='px-6 py-4'>
                             <button
                                 onClick={() => handleAcceptApplication(app.app_id)}
