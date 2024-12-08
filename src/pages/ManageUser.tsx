@@ -12,7 +12,7 @@ type User = {
 };
 
 type Sponsor = {
-  id: number | undefined;
+  sponsor_id: number | undefined;
   fname: string;
   lname: string;
   email: string;
@@ -20,6 +20,7 @@ type Sponsor = {
 };
 
 const ManageUser: React.FC = () => {
+  
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthenticator();
@@ -44,8 +45,11 @@ const ManageUser: React.FC = () => {
           'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getUser',
           { params: { id } }
         );
+        
         const userData = JSON.parse(response.data.body)[0];
         setUserData(userData);
+        console.log(userData);
+
       } catch (err: any) {
         console.error("API Error:", err);
         setError(err.message || 'An error occurred');
@@ -63,7 +67,7 @@ const ManageUser: React.FC = () => {
         { params: { driverEmail: driverEmail } }
       );
       let sponsorsData = JSON.parse(response.data.body);
-      console.log(sponsorsData);
+      
   
       // Normalize the sponsor data just like in fetchAllSponsors
       sponsorsData = sponsorsData.map((sponsor: any) => ({
@@ -71,7 +75,7 @@ const ManageUser: React.FC = () => {
         fname: sponsor.fname || sponsor.firstName || '',
         lname: sponsor.lname || sponsor.lastName || '',
       }));
-  
+      console.log(sponsorsData);
       setSponsors(sponsorsData);
     } catch (err: any) {
       console.error("API Error:", err);
@@ -105,6 +109,7 @@ const ManageUser: React.FC = () => {
             (sponsor: Sponsor) => sponsor.fname && sponsor.lname
           );
           setAllSponsors(validSponsors);
+          console.log(validSponsors);
         } else {
           console.error("Expected an array but got:", sponsorsData);
           setAllSponsors([]);
@@ -160,20 +165,28 @@ const ManageUser: React.FC = () => {
   };
 
   const handleLinkSponsor = async () => {
+    if(!selectedSponsor || !allSponsors || !userData)
+      {
+          alert("Something went wrong.");
+          return;
+      } 
+    let sponsor_index:number = selectedSponsor;
     if (selectedSponsor && userData) {
       try {
         // Include 'type': 'addSponsorDriverRelation' just like you did in the Lambda test
         const response = await axios.post(
-          'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/addSponsorDriverRelation',
+          'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/addSponsorDriverRelation?driver_id=' + userData.id + "&sponsor_id=" + sponsor_index,
           { 
-            type: 'addSponsorDriverRelation',
-            driver_id: userData.id, 
-            sponsor_id: selectedSponsor 
+            //type: 'addSponsorDriverRelation',
+            //driver_id: userData.id, 
+            //sponsor_id: sponsor_index
           },
           {
             headers: { 'Content-Type': 'application/json' }
           }
         );
+
+        console.log(response);
   
         if (response.status === 200) {
           alert('Sponsor linked successfully!');
@@ -237,7 +250,7 @@ const ManageUser: React.FC = () => {
               {sponsors.length > 0 ? (
                 <div className="space-y-2">
                   {sponsors.map((sponsor, index) => {
-                    const sponsorKey = sponsor.id ?? `aff-sponsor-fallback-${index}`;
+                    const sponsorKey = sponsor.sponsor_id ?? `aff-sponsor-fallback-${index}`;
                     return (
                       <div key={sponsorKey} className="p-3 bg-gray-50 rounded">
                         <span className="font-bold">{sponsor.fname} {sponsor.lname}</span>
@@ -273,18 +286,20 @@ const ManageUser: React.FC = () => {
             <div>
               <label className="block text-gray-700 mb-2">Link Sponsor</label>
               <select
-                value={selectedSponsor !== null ? selectedSponsor.toString() : ''}
+                value={selectedSponsor !== null ? selectedSponsor : ''}
+                
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
                   setSelectedSponsor(isNaN(val) ? null : val);
+                  console.log(e.target.value);
                 }}
                 className="w-full p-2 border rounded"
               >
                 <option value="" disabled>Select a sponsor</option>
                 {allSponsors.map((sponsor, index) => {
-                  const sponsorKey = sponsor.id ?? `all-sponsor-fallback-${index}`;
-                  const optionValue = sponsor.id !== undefined
-                    ? sponsor.id.toString()
+                  const sponsorKey = sponsor.sponsor_id ?? `all-sponsor-fallback-${index}`;
+                  const optionValue = sponsor.sponsor_id !== undefined
+                    ? sponsor.sponsor_id.toString()
                     : index.toString();
 
                   return (
