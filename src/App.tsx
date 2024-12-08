@@ -63,6 +63,8 @@ function App() {
     if (initialNavigationDone || role === null) return;
 
     if (location.pathname === "/") {
+      navigate("/about");
+      /*
       if (role === "admin") {
         navigate("/admin-dashboard");
       } else if (role === "driver") {
@@ -72,6 +74,7 @@ function App() {
       } else {
         navigate("/profile");
       }
+        */
     }
   }, [role, navigate, initialNavigationDone]);
 
