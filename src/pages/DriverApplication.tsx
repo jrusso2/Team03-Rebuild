@@ -14,20 +14,18 @@ const DriverApplication: React.FC = () => {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>("");
+  const [user_email, setEmail] = useState<string | null>("");
 
   useEffect(() => {
     const fetchEmail = async () =>{
       const attributes = await fetchUserAttributes();
-      const user_email = attributes['email'];
-      if(user_email)
-      {
-        setEmail(user_email);
-      }
-      console.log("***********user email!!" + user_email);
-      
-    }
-    const fetchSponsors = async () => {
+      let email;
+      email = await attributes['email'];
+      if(!email) return "";
+      setEmail(email);
+      return email as string;
+  };
+    const fetchSponsors = async (email:string) => {
       try {
         setLoading(true);
         const response = await axios.get(
@@ -48,8 +46,15 @@ const DriverApplication: React.FC = () => {
         setLoading(false);
       }
     };
-    fetchEmail();
-    fetchSponsors();
+    
+    
+    const doTasks = async () => {
+      let email = await fetchEmail();
+      
+      await fetchSponsors(email as string);
+  }
+  doTasks();
+
   }, [user]);
 
   const handleApplyToSponsor = async (sponsorId: number) => {
@@ -59,7 +64,7 @@ const DriverApplication: React.FC = () => {
         `https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/insertNewApplication`,
         {
           params: {
-            driverEmail: email,
+            driverEmail: user_email,
             sponsorID: sponsorId,
           },
         }
