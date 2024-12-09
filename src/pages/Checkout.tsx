@@ -3,13 +3,14 @@ import { DataStore } from '@aws-amplify/datastore';
 import { CartItem } from '../models';
 
 import { fetchUserAttributes } from 'aws-amplify/auth';
-const POINTS_PER_DOLLAR = 10; // Points conversion rate
+let POINTS_PER_DOLLAR = 10; // Points conversion rate
 
 export type Sponsor = {
   sponsor_id: number;
   fname: string;
   lname: string;
   balance: string;
+  conversion_rate: number;
 };
 
 
@@ -72,7 +73,16 @@ const Checkout = ({ driverID, sponsorID }: { driverID: string; sponsorID: string
 
 
   const calculateTotalPoints = () => {
-    return cart.reduce((total, item) => total + Math.round((item.price || 0) * POINTS_PER_DOLLAR), 0);
+    if(sponsors && selectedSponsor && sponsors[selectedSponsor] && sponsors[selectedSponsor].conversion_rate)
+    {
+      
+      POINTS_PER_DOLLAR = sponsors[selectedSponsor].conversion_rate;
+    }
+    return cart.reduce((total, item) => total + Math.round((item.price || 0) / (POINTS_PER_DOLLAR)), 0);
+  };
+
+  const calculateTotalDollars = () => {
+    return cart.reduce((total, item) => item.price ? total + item.price : 0, 0);
   };
 
   const handleCheckout = async () => {
@@ -231,14 +241,15 @@ const Checkout = ({ driverID, sponsorID }: { driverID: string; sponsorID: string
                   </div>
                 </div>
                 <p style={{ fontWeight: 'bold', color: '#333' }}>
-                  {Math.round((item.price || 0) * POINTS_PER_DOLLAR)} Points
+                  {Math.round((item.price || 0) / POINTS_PER_DOLLAR)} Points (${item.price})
                 </p>
               </li>
             ))}
           </ul>
 
           <div style={{ textAlign: 'right', marginTop: '20px' }}>
-            <h2>Total Points: {calculateTotalPoints()}</h2>
+            <h2>Total: {calculateTotalPoints()} Points</h2>
+            <h2>(${calculateTotalDollars()})</h2>
           </div>
 
           <button
