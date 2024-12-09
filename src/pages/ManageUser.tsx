@@ -9,6 +9,7 @@ type User = {
   lastName: string;
   email: string;
   user_type: string;
+  phoneNumber: string;
 };
 
 type Sponsor = {
@@ -32,7 +33,8 @@ const ManageUser: React.FC = () => {
   const [editForm, setEditForm] = useState({
     firstName: '',
     lastName: '',
-    user_type: ''
+    user_type: '',
+    phoneNumber: '',
   });
   const [allSponsors, setAllSponsors] = useState<Sponsor[]>([]);
   const [selectedSponsor, setSelectedSponsor] = useState<number | null>(null);
@@ -42,13 +44,17 @@ const ManageUser: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getUser',
+          'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/main/getUser',
           { params: { id } }
         );
         
         const userData = JSON.parse(response.data.body)[0];
         setUserData(userData);
         console.log(userData);
+
+        if (userData.phoneNumber) {
+          setEditForm({ ...editForm, phoneNumber: userData.phoneNumber });
+        }
 
       } catch (err: any) {
         console.error("API Error:", err);
@@ -127,7 +133,8 @@ const ManageUser: React.FC = () => {
     setEditForm({
       firstName: userData?.firstName || '',
       lastName: userData?.lastName || '',
-      user_type: userData?.user_type || ''
+      user_type: userData?.user_type || '',
+      phoneNumber: userData?.phoneNumber || '',
     });
     setIsEditing(true);
   };
@@ -236,6 +243,10 @@ const ManageUser: React.FC = () => {
               <div>
                 <span className="text-gray-600">Email: </span>
                 <span className="font-bold">{userData.email}</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Phone Number: </span>
+                <span className="font-bold">{userData.phoneNumber}</span>
               </div>
               <div>
                 <span className="text-gray-600">User Type: </span>
