@@ -1,21 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import ViewDriversTable from '../ui/Sponsor/ViewDriversTable';
 import axios from 'axios';
+import { fetchUserAttributes } from 'aws-amplify/auth';
 
 const SponsorDashboard: React.FC = () => {
   const [conversionRate, setConversionRate] = useState<number>(1.0); // Default value
   const [newRate, setNewRate] = useState<string>(""); // New rate input
   const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false); // Modal visibility
-
+  const [user_email, setEmail] = useState<string>("");
   // Fetch the current conversion rate when the component loads
   useEffect(() => {
-    const fetchConversionRate = async () => {
+    const fetchEmail = async () =>{
+      const attributes = await fetchUserAttributes();
+      let email;
+      email = await attributes['email'];
+      if(!email) return "";
+      setEmail(email);
+      return email as string;
+    };
+    const fetchConversionRate = async (email:string) => {
       try {
         const response = await axios.get(
-          "https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/main/getConversionRate", // Replace with your API endpoint
+          "https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/getConversionRate", // Replace with your API endpoint
           {
             params: {
-              sponsorEmail: "sponsor@example.com", // Replace with actual sponsor email
+              sponsorEmail: email, // Replace with actual sponsor email
             },
           }
         );
@@ -25,7 +34,13 @@ const SponsorDashboard: React.FC = () => {
       }
     };
 
-    fetchConversionRate();
+    const doTasks = async () => {
+      let email = await fetchEmail();
+      
+      await fetchConversionRate(email as string);
+     };
+
+    doTasks();
   }, []);
 
   // Update conversion rate
@@ -36,8 +51,8 @@ const SponsorDashboard: React.FC = () => {
     }
 
     try {
-      await axios.put("https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/main/updateConversionRate", {
-        sponsorEmail: "sponsor@example.com", // Replace with actual sponsor email
+      await axios.put("https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/updateConversionRate", {
+        sponsorId: user_email, // Replace with actual sponsor email
         newRate: parseFloat(newRate),
       });
 
