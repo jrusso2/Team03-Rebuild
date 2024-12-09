@@ -92,6 +92,7 @@ export default function PointHistoryTable()
     //TODO: fix table so that it has right amount of columns
     return (
         
+        //TODO: clean up this old tailwind
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <caption className="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">

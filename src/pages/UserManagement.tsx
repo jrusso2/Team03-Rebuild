@@ -50,15 +50,17 @@ const UserManagement: React.FC = () => {
     }
 
     try {
-      await axios.delete(
+      let response = await axios.delete(
         'https://62rwb01jw8.execute-api.us-east-1.amazonaws.com/test/deleteUser',
         { 
           params: { 
-            userId,
+            id:userId,
             adminEmail: user?.signInDetails?.loginId 
           } 
         }
       );
+      //let data = await response.json();
+      console.log(response);
 
       // Update the users list by filtering out the deleted user
       setUsers(users.filter(user => user.id !== userId));
@@ -66,6 +68,8 @@ const UserManagement: React.FC = () => {
       console.error("Delete Error:", err);
       alert('Failed to delete user: ' + (err.message || 'An error occurred'));
     }
+    console.log(userId);
+    
   };
 
   if (loading) {
