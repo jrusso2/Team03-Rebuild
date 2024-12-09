@@ -1,35 +1,44 @@
+
+.tableContainer
+{
+  overflow: scroll;
+  height:500px;
+}
+
 /* General table styles */
 table {
-    width: 100%;
-    border-collapse: collapse; /* Removes space between borders */
-    margin: 20px 0;
-    font-size: 16px;
-    text-align: left;
-  }
-  
-  /* Table header styles */
-  thead th {
-    background-color: #f4f4f4;
-    color: #333;
-    font-weight: bold;
-    padding: 12px;
-    border: 1px solid #ddd;
-  }
-  
-  /* Table body styles */
-  tbody td {
-    padding: 10px;
-    border: 1px solid #ddd;
-  }
-  
-  /* Alternating row colors */
-  tbody tr:nth-child(odd) {
-    background-color: #f9f9f9;
-  }
-  
-  /* Hover effect */
-  tbody tr:hover {
-    background-color: #f1f1f1;
-    cursor: pointer;
-  }
-  
+  width: 100%;
+  border-collapse: collapse; /* Removes space between borders */
+  margin: 20px 0;
+  font-size: 16px;
+  text-align: left;
+}
+
+/* Table header styles */
+thead th {
+  background-color: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+  padding: 12px;
+  border: 1px solid #ddd;
+}
+
+/* Table body styles */
+tbody td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+/* Alternating row colors */
+tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+/* Hover effect */
+tbody tr:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+
+
+

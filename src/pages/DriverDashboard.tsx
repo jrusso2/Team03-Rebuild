@@ -7,7 +7,9 @@ const DriverDashboard: React.FC = () => {
     <div>
       <h1>Driver Dashboard</h1>
       <ViewSponsorsTable/>
-      <PointHistoryTable/>
+      <div className="tableContainer">
+        <PointHistoryTable/>
+      </div>
     </div>
   );
 };
